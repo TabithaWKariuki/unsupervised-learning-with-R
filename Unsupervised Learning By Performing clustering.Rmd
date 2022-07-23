@@ -1,0 +1,583 @@
+---
+title: "Kira Platinina Project"
+author: "Tabitha Kariuki"
+date: "2022-07-22"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+# R Programming Exploratory Data Analysis And Modeling
+
+
+## 1. Defining the Question
+
+**a) Specifying the Data Analytic Question**
+
+Kira Plastinina is a Russian brand that is sold through a defunct chain of retail stores in Russia, Ukraine, Kazakhstan, Belarus, China, Philippines, and Armenia. The brand's Sales and Marketing team would like to understand their customer's behavior from data that they have collected over the past year. More specifically, they would like to learn the characteristics of customer groups.
+
+Your findings should help inform the team in formulating the marketing and sales strategies of the brand.
+
+**b) Defining the Metric for Success**
+
+1. Perform clustering stating insights drawn from your analysis and visualizations.
+
+2. Upon implementation, provide comparisons between the approaches learned this week i.e. K-Means clustering vs Hierarchical clustering highlighting the strengths and limitations of each approach in the context of your analysis.
+
+**c) Understanding the context**
+
+Perform EDA and Unsupervised Modeling for the give data set <http://bit.ly/EcommerceCustomersDataset>
+
+**d) Experimental design taken**
+
+1. Problem Definition
+
+2. Data Sourcing
+
+3. Check the Data
+
+4. Perform Data Cleaning
+
+5. Perform Exploratory Data Analysis  (Univariate, Bivariate & Multivariate)
+
+6. Implement the Solution
+
+7. Challenge the Solution
+
+8. Follow up Questions
+
+**e) Appropriateness of the available data**
+
+The dataset has appropriate columns and rows to answer the questions. The data is relevant for our analysis.
+
+
+## 2. Loading the dataset
+
+```{r}
+# Loading the dataset
+
+ecom <- read.csv('http://bit.ly/EcommerceCustomersDataset')
+```
+
+
+## 3. Checking our data
+
+```{r}
+# Checking the top rows
+
+head(ecom)
+```
+
+```{r}
+# Checking the bottom rows
+
+tail(ecom)
+```
+
+
+```{r}
+# Checking the shape of our data
+
+dim(ecom)
+```
+**The dataset has 12330 rows and 18 columns**
+
+```{r}
+# Checking the structure/datatypes of our data
+
+str(ecom)
+```
+
+
+```{r}
+# checking the attributes of our dataset
+
+class(ecom)
+```
+
+
+```{r}
+# checking the columns of our dataset
+
+colnames(ecom)
+```
+
+## 4. Data Cleaning
+
+```{r}
+# Sum of null values in each column using the function colSums()
+
+colSums(is.na(ecom))
+```
+**There are null values in our data. We shall be dropping the Missing values to avoid inconsistency in our dataset.**
+
+
+```{r}
+# Dropping the null values
+
+ecom <- na.omit(ecom)
+```
+
+
+```{r}
+# Checking again for the Sum of null values in each column using the function colSums()
+
+colSums(is.na(ecom))
+```
+
+
+```{r}
+# Now lets find the duplicated rows in the dataset 
+# and assign to a variable duplicated_rows below
+
+duplicated_rows <- ecom[duplicated(ecom),]
+
+# Lets print out the variable duplicated_rows and see these duplicated rows 
+
+duplicated_rows
+```
+
+**There are 117 duplicated rows in the data**
+
+```{r}
+# Checking for total duplicates values.
+
+sum(duplicated(ecom))
+```
+**I will be dropping the duplicates since there no significant change in the data**
+
+
+```{r}
+# Selecting the non-duplicates using the unique function
+
+ecom <- unique(ecom)
+
+# Checking to confirm they have been removed
+
+sum(duplicated(ecom))
+```
+**Checking and Dealing With Outliers** 
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$Administrative)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$Administrative_Duration)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$Informational)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$Informational_Duration)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$ProductRelated)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$ProductRelated_Duration)
+```
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$BounceRates)
+```
+
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$ExitRates)
+```
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$ExitRates)
+```
+
+```{r}
+# Checking for outliers using boxplots
+
+boxplot(ecom$PageValues)
+```
+
+**There is a presence of a large number of outliers. I will not dropping them since they remain relevant for our analyis**
+
+
+## 5. Eploratory Data Analysis
+
+**Univaraiate Analysis**
+
+
+```{r}
+
+library("psych")
+```
+
+
+```{r}
+# Finding the summary statistics
+
+describe(ecom)
+```
+
+
+```{r}
+# computing the measures of central tendency and the measures of dispersion
+
+library(modeest)
+```
+
+
+```{r}
+library(MASS)
+```
+
+
+```{r}
+library(moments)
+```
+
+
+```{r}
+# computing the measures of central tendency and the measures of dispersion for numeric variables
+
+customer <- Filter(is.numeric, ecom)
+stats <- data.frame(
+  Mean = apply(customer, 2, mean), 
+  Median = apply(customer, 2, median), 
+  Mode = apply(customer, 2, mfv), 
+  Min = apply(customer, 2, min),  
+  Max = apply(customer, 2, max),    
+  Variance= apply(customer, 2, var),  
+  Std = apply(customer, 2, sd),
+  Skewness = apply(customer, 2, skewness),
+  Kurtosis = apply(customer, 2, kurtosis))
+  
+
+# Round off the values to 2 decimal places and viewing the summary
+
+stats <- round(stats, 2)
+
+stats
+```
+
+
+```{r}
+# BounceRates
+
+hist(ecom$BounceRates, col=blues9)
+```
+
+
+```{r}
+# Informational_Duration
+
+hist(ecom$Informational_Duration, col=blues9)
+```
+
+
+```{r}
+# Exit Rates
+
+hist(ecom$ExitRates, col=blues9)
+```
+
+
+```{r}
+# Informational
+
+hist(ecom$Informational, col=blues9)
+```
+
+
+```{r}
+# Special Day
+
+hist(ecom$SpecialDay, col=blues9)
+```
+
+
+```{r}
+# Product Related
+
+hist(ecom$ProductRelated, col=blues9)
+```
+
+
+**Bivariate Analysis**
+
+```r
+install.packages("corrplot")
+```
+
+
+```r
+install.packages("ggcorrplot")
+```
+
+```{r}
+# Compute a correlation matrix
+
+data(customer)
+
+corr <- round(cor(customer), 1)
+
+head(corr)
+```
+
+```{r}
+# Compute a matrix of correlation p-values
+
+library(ggcorrplot)
+
+p <- cor_pmat(customer)
+
+head(p)
+```
+
+```{r}
+# Plotting a heatmap 
+# argument lab = TRUE
+
+ggcorrplot(corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+```
+
+
+```{r}
+# ggcorrplot: visualize correlation matrix using ggplot2
+# method = "circle"
+
+ggcorrplot(corr, method = "circle")
+```
+
+**Multivariate Analysis**
+
+```{r}
+
+# Scaling the dataset to reduce
+# Dimensionality reduction, or dimension reduction, is the transformation of data from a # high-dimensional space into a low-dimensional space so that the low-dimensional 
+# representation retains some meaningful properties of the original data
+
+customers <- scale(customer)
+
+head(customers)
+```
+
+```{r}
+# Performing PCA
+
+pca <- prcomp(customer, center = TRUE, scale = TRUE)
+
+print(pca)
+```
+
+## 6. Modeling
+
+**K-Means clustering**
+
+```{r}
+library(lattice)
+```
+
+
+
+```{r}
+library(caret)
+```
+
+
+
+```{r}
+
+ecom.new<- ecom[, 1:10]
+ecom.class<- ecom[, "Weekend"]
+
+head(ecom.new)
+```
+
+
+```{r}
+# Previewing the class column
+
+head(ecom.class)
+```
+
+
+```{r}
+# Normalize the values 
+
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))
+}
+
+ecom.new$Administrative<- normalize(ecom.new$Administrative)
+ecom.new$Administrative_Duration<- normalize(ecom.new$Administrative_Duration)
+ecom.new$Informational<- normalize(ecom.new$Informational)
+ecom.new$Informational_Duration<- normalize(ecom.new$Informational_Duration)
+ecom.new$ProductRelated<- normalize(ecom.new$ProductRelated)
+ecom.new$ProductRelated_Duration<- normalize(ecom.new$ProductRelated_Duration)
+ecom.new$BounceRates<- normalize(ecom.new$BounceRates)
+ecom.new$ExitRates<- normalize(ecom.new$ExitRates)
+ecom.new$PageValues<- normalize(ecom.new$PageValues)
+ecom.new$SpecialDay<- normalize(ecom.new$SpecialDay)
+
+
+head(ecom.new)
+```
+
+
+```{r}
+# Applying the K-means clustering algorithm with no. of centroids(k)=3
+# ---
+# 
+result<- kmeans(ecom.new,3) 
+
+# Previewing the no. of records in each cluster
+# 
+result$size
+```
+
+```{r}
+# Getting the value of cluster center datapoint value(3 centers for k=3)
+# ---
+# 
+result$centers 
+```
+
+```{r}
+# Getting the cluster vector that shows the cluster where each record falls
+
+result$cluster
+```
+
+
+```{r}
+# Visualizing the  clustering results
+# ---
+# 
+par(mfrow = c(1,2), mar = c(5,4,2,2))
+
+# Plotting to see how exit rates and Bounce Rates data points have been distributed in clusters
+# ---
+#
+plot(ecom.new[,7:8], col = result$cluster)
+```
+
+
+```{r}
+# Verifying the results of clustering
+# ---
+# 
+par(mfrow = c(2,2), mar = c(5,4,2,2))
+
+# Plotting to see how Administrative and Administrative_Duration data points have been distributed in clusters
+
+plot(ecom.new[c(1,2)], col = result$cluster)
+
+# Plotting to see how Administrative and dministrative_Duration data points have been distributed 
+# originally as per "class" attribute in dataset
+
+plot(ecom.new[c(1,2)], col = ecom.class)
+
+# Plotting to see how information and informational duration data points have been distributed in clusters
+# ---
+# 
+plot(ecom.new[c(3,4)], col = result$cluster)
+plot(ecom.new[c(3,4)], col = ecom.class)
+```
+
+
+```{r}
+# Result of table shows what corresponds to what 
+
+table(result$cluster, ecom.class)
+```
+
+
+**Hierarchical clustering**
+
+```{r}
+# Before hierarchical clustering, we can compute some descriptive statistics
+# # We note that the variables have a large different means and variances. 
+# This is explained by the fact that the variables are measured in different 
+# They must be standardized (i.e., scaled) to make them comparable. Recall that, 
+# standardization consists of transforming the variables such that 
+# they have mean zero and standard deviation one.
+
+cust <- Filter(is.numeric, ecom)
+stats <- data.frame(
+  Mean = apply(cust, 2, mean), 
+  Median = apply(cust, 2, median), 
+  Mode = apply(cust, 2, mfv), 
+  Min = apply(cust, 2, min),  
+  Max = apply(cust, 2, max),    
+  Variance= apply(cust, 2, var),  
+  Std = apply(cust, 2, sd),
+  Skewness = apply(cust, 2, skewness),
+  Kurtosis = apply(cust, 2, kurtosis))
+  
+
+# Round off the values to 2 decimal places and viewing the summary
+
+stats <- round(stats, 2)
+
+stats
+```
+
+```{r}
+# we start by scaling the data using the R function scale() as follows
+# we view the previous dataframe that had been scaled
+ 
+head(customers)
+```
+
+```{r}
+# We now use the R function hclust() for hierarchical clustering
+# First we use the dist() function to compute the Euclidean distance between 
+# observations, 
+# d will be the first argument in the hclust() function dissimilarity matrix
+
+d <- dist(customers, method = "euclidean")
+
+# We then hierarchical clustering using the Ward's method
+
+res.hc <- hclust(d, method = "ward.D2" )
+```
+
+
+```{r}
+# Lastly, we plot the obtained dendrogram
+
+plot(res.hc, cex = 0.6, hang = -1)
+```
+
+# 7. Conclusion/Recommendations
+
+**K Means clustering was difficult to implement. Hierarchial Clustering was easy to apply through it has very low accuracy. Assigning K another value, might improve it's accuracy as scaling and dimension reduction**
